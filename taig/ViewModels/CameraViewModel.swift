@@ -76,15 +76,23 @@ class CameraViewModel: ObservableObject {
     /// 카메라로 찍은 사진 처리
     /// - Parameter image: 카메라로 찍은 UIImage
     func processCapturedImage(_ image: UIImage) {
-        selectedImage = image
-        isShowingTagInput = true
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.selectedImage = image
+            self.isShowingTagInput = true
+            print("카메라로 찍은 사진 처리: 태그 입력 팝업 표시")
+        }
     }
     
     /// 갤러리에서 선택한 사진 처리
     /// - Parameter image: 갤러리에서 선택한 UIImage
     func processSelectedImage(_ image: UIImage) {
-        selectedImage = image
-        isShowingTagInput = true
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.selectedImage = image
+            self.isShowingTagInput = true
+            print("갤러리에서 선택한 사진 처리: 태그 입력 팝업 표시")
+        }
     }
     
     /// 사진과 태그 저장
@@ -94,9 +102,15 @@ class CameraViewModel: ObservableObject {
     func savePhotoWithTags(image: UIImage, tags: [String]) {
         guard let image = selectedImage else { return }
         
+        // 저장 시작 로그
+        print("사진 저장 시작: \(tags.count)개의 태그")
+        
         // 이미지를 앱 내부 저장소에 저장
         photoService.saveImageToDocuments(image: image) { [weak self] fileURL in
-            guard let self = self, let fileURL = fileURL else { return }
+            guard let self = self, let fileURL = fileURL else { 
+                print("이미지 저장 실패")
+                return 
+            }
             
             // 썸네일 생성
             let thumbnailData = self.photoService.createThumbnail(
@@ -126,42 +140,47 @@ class CameraViewModel: ObservableObject {
             photoEntity.createdAt = Date()
             photoEntity.modifiedAt = Date()
             
-            // 태그 생성 및 연결
-            for tagName in tagNames {
-                // 이미 존재하는 태그인지 확인
-                let fetchRequest: NSFetchRequest<TagEntity> = TagEntity.fetchRequest()
-                fetchRequest.predicate = NSPredicate(format: "name == %@", tagName)
-                
-                do {
-                    let results = try self.viewContext.fetch(fetchRequest)
-                    let tagEntity: TagEntity
+            // 태그가 있는 경우에만 태그 생성 및 연결
+            if !tagNames.isEmpty {
+                for tagName in tagNames {
+                    // 이미 존재하는 태그인지 확인
+                    let fetchRequest: NSFetchRequest<TagEntity> = TagEntity.fetchRequest()
+                    fetchRequest.predicate = NSPredicate(format: "name == %@", tagName)
                     
-                    if let existingTag = results.first {
-                        // 기존 태그 사용
-                        tagEntity = existingTag
-                    } else {
-                        // 새 태그 생성
-                        tagEntity = TagEntity(context: self.viewContext)
-                        tagEntity.id = UUID()
-                        tagEntity.name = tagName
-                        tagEntity.createdAt = Date()
+                    do {
+                        let results = try self.viewContext.fetch(fetchRequest)
+                        let tagEntity: TagEntity
+                        
+                        if let existingTag = results.first {
+                            // 기존 태그 사용
+                            tagEntity = existingTag
+                        } else {
+                            // 새 태그 생성
+                            tagEntity = TagEntity(context: self.viewContext)
+                            tagEntity.id = UUID()
+                            tagEntity.name = tagName
+                            tagEntity.createdAt = Date()
+                        }
+                        
+                        // 태그와 사진 연결
+                        photoEntity.addToTags(tagEntity)
+                    } catch {
+                        print("태그 검색 실패: \(error.localizedDescription)")
                     }
-                    
-                    // 태그와 사진 연결
-                    photoEntity.addToTags(tagEntity)
-                } catch {
-                    print("태그 검색 실패: \(error.localizedDescription)")
                 }
             }
             
             // 변경사항 저장
             do {
                 try self.viewContext.save()
+                print("사진 및 태그 저장 완료")
                 
                 // UI 업데이트는 메인 스레드에서
                 DispatchQueue.main.async {
                     self.selectedImage = nil
                     self.isShowingTagInput = false
+                    // 최근 사진 다시 로드
+                    self.loadRecentPhotos()
                 }
             } catch {
                 print("저장 실패: \(error.localizedDescription)")

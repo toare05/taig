@@ -72,7 +72,10 @@ struct ContentView: View {
                     cameraViewModel.processSelectedImage(image)
                 }
             }
-            .sheet(isPresented: $cameraViewModel.isShowingTagInput) {
+            .sheet(isPresented: $cameraViewModel.isShowingTagInput, onDismiss: {
+                // 태그 입력 팝업이 닫힐 때 처리
+                print("태그 입력 팝업 닫힘")
+            }) {
                 if let image = cameraViewModel.selectedImage {
                     TagInputPopupView(image: image) { tags in
                         cameraViewModel.savePhotoWithTags(image: image, tags: tags)

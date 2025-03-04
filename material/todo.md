@@ -1,67 +1,73 @@
-# Taig Project - Todo List
+# Taig 프로젝트 - 할 일 목록
 
-## Phase 1: Design & Setup
-- [x] Create project architecture document
-- [x] Set up iOS project with SwiftUI
-- [x] Configure PhotoKit integration
-- [x] Set up CoreData schema for storing photos and tags
-- [x] Design UI wireframes for all screens
-- [x] Create UI component library
+## 1단계: 설계 및 초기 설정
+- [x] 프로젝트 아키텍처 문서 작성
+- [x] SwiftUI로 iOS 프로젝트 설정
+- [x] PhotoKit 통합 구성
+- [x] 사진과 태그 저장을 위한 CoreData 스키마 설정
+- [x] 모든 화면의 UI 와이어프레임 설계
+- [x] UI 컴포넌트 라이브러리 생성
 
-## Phase 2: Core Features Implementation
-### Photo Capture (Feature 1.1)
-- [x] Implement in-app camera functionality
-- [x] Add gallery import option
-- [x] Create photo preview screen
-- [x] Implement photo storage with metadata
+## 2단계: 핵심 기능 구현
+### 사진 캡처 (기능 1.1)
+- [x] 앱 내 카메라 기능 구현
+- [x] 갤러리 가져오기 옵션 추가
+- [x] 사진 미리보기 화면 생성
+- [x] 메타데이터가 포함된 사진 저장 구현
 
-### Tag Management (Feature 1.1)
-- [x] Create tag input popup UI
-- [x] Implement tag creation and storage
-- [x] Link tags to photos in CoreData
-- [x] Add tag editing functionality
+### 태그 관리 (기능 1.1)
+- [x] 태그 입력 팝업 UI 생성
+- [x] 태그 생성 및 저장 구현
+- [x] CoreData에서 태그와 사진 연결
+- [x] 태그 편집 기능 추가
 
-### Search Functionality
-- [ ] Implement tag-based search interface
-- [ ] Create search results view
-- [ ] Optimize search performance
-- [ ] Add sorting and filtering options
+### 사진 캡처-태그 연동 워크플로우
+- [x] 사진 캡처 직후 자동으로 태그 입력 팝업 표시 구현
+- [x] 태그 입력 후 저장 프로세스 최적화
+- [x] 사용자가 태그 입력을 건너뛸 수 있는 옵션 추가
+- [x] 태그 입력 중 사진 미리보기 표시 기능
 
-## Phase 3: Testing & Refinement
-- [ ] Perform unit testing for all components
-- [ ] Conduct UI/UX testing
-- [ ] Optimize performance for large photo libraries
-- [ ] Fix identified bugs and issues
-- [ ] Implement user feedback
+### 검색 기능
+- [ ] 태그 기반 검색 인터페이스 구현
+- [ ] 검색 결과 화면 생성
+- [ ] 검색 성능 최적화
+- [ ] 정렬 및 필터링 옵션 추가
 
-## Phase 4: Release Preparation
-- [ ] Finalize app icon and branding
-- [ ] Prepare App Store listing materials
-- [ ] Create user documentation
-- [ ] Implement analytics for usage tracking
-- [ ] Prepare for App Store submission
+## 3단계: 테스트 및 개선
+- [ ] 모든 컴포넌트 단위 테스트 수행
+- [ ] UI/UX 테스트 진행
+- [ ] 대용량 사진 라이브러리 성능 최적화
+- [ ] 발견된 버그 및 문제 수정
+- [ ] 사용자 피드백 반영
 
-## Future Features (Post-MVP)
-### AI Tag Recommendation (Feature 1.2)
-- [ ] Research on-device ML models for image recognition
-- [ ] Implement tag suggestion algorithm
-- [ ] Create UI for suggested tags
-- [ ] Test accuracy and performance
+## 4단계: 출시 준비
+- [ ] 앱 아이콘 및 브랜딩 완성
+- [ ] 앱 스토어 등록 자료 준비
+- [ ] 사용자 문서 작성
+- [ ] 사용량 추적을 위한 분석 도구 구현
+- [ ] 앱 스토어 제출 준비
 
-### Alarm Setting (Feature 2.1)
-- [ ] Design alarm setup interface
-- [ ] Implement local notifications
-- [ ] Create reminder management system
-- [ ] Add notification handling
+## 향후 기능 (MVP 이후)
+### AI 태그 추천 (기능 1.2)
+- [ ] 이미지 인식을 위한 온디바이스 ML 모델 연구
+- [ ] 태그 추천 알고리즘 구현
+- [ ] 추천 태그 UI 생성
+- [ ] 정확도 및 성능 테스트
 
-### Calendar Integration (Feature 2.2)
-- [ ] Design calendar view
-- [ ] Implement EventKit integration
-- [ ] Create event creation from photos
-- [ ] Add bidirectional sync between photos and calendar
+### 알람 설정 (기능 2.1)
+- [ ] 알람 설정 인터페이스 설계
+- [ ] 로컬 알림 구현
+- [ ] 리마인더 관리 시스템 생성
+- [ ] 알림 처리 추가
 
-### Additional Enhancements
-- [ ] Add iCloud synchronization
-- [ ] Implement multi-language support
-- [ ] Create backup and restore functionality
-- [ ] Add advanced photo editing features
+### 캘린더 연동 (기능 2.2)
+- [ ] 캘린더 뷰 설계
+- [ ] EventKit 연동 구현
+- [ ] 사진에서 이벤트 생성 기능
+- [ ] 사진과 캘린더 간 양방향 동기화 추가
+
+### 추가 개선사항
+- [ ] iCloud 동기화 추가
+- [ ] 다국어 지원 구현
+- [ ] 백업 및 복원 기능 생성
+- [ ] 고급 사진 편집 기능 추가

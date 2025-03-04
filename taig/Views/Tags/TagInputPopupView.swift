@@ -43,19 +43,36 @@ struct TagInputPopupView: View {
                 
                 Spacer()
                 
-                // 저장 버튼
-                Button(action: saveAction) {
-                    Text("저장")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(12)
+                HStack {
+                    // 건너뛰기 버튼
+                    Button(action: {
+                        // 빈 태그 배열로 저장 (건너뛰기)
+                        onSave([])
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Text("건너뛰기")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.gray.opacity(0.2))
+                            .cornerRadius(12)
+                    }
+                    
+                    // 저장 버튼
+                    Button(action: saveAction) {
+                        Text("저장")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(tags.isEmpty ? Color.blue.opacity(0.5) : Color.blue)
+                            .cornerRadius(12)
+                    }
+                    .disabled(tags.isEmpty)
                 }
                 .padding(.horizontal)
                 .padding(.bottom)
-                .disabled(tags.isEmpty)
             }
             .navigationTitle("태그 추가")
             .navigationBarTitleDisplayMode(.inline)
