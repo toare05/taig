@@ -10,87 +10,65 @@ import Photos
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
-    @StateObject private var cameraViewModel = CameraViewModel(context: PersistenceController.shared.container.viewContext)
+    @StateObject private var screenshotViewModel = ScreenshotViewModel(context: PersistenceController.shared.container.viewContext)
     
     var body: some View {
         NavigationView {
             VStack {
                 // 스크린샷 감지 안내 텍스트
                 Text("스크린샷을 찍으면 자동으로 태그를 추가할 수 있습니다")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .padding(.horizontal)
+                    .padding(.top, 16)
+                
+                Text("앱을 사용하는 동안 스크린샷을 찍으면\n자동으로 태그 입력 화면이 표시됩니다")
                     .font(.subheadline)
                     .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
                     .padding(.horizontal)
                     .padding(.top, 8)
                 
-                // 최근 사진 그리드 (나중에 구현)
-                if cameraViewModel.isLoading {
-                    ProgressView("사진 로딩 중...")
-                } else if cameraViewModel.recentPhotoImages.isEmpty {
-                    Text("최근 사진이 없습니다")
-                        .foregroundColor(.gray)
-                        .padding()
+                // 최근 스크린샷 그리드
+                if screenshotViewModel.isLoading {
+                    ProgressView("스크린샷 로딩 중...")
+                        .padding(.top, 40)
+                } else if screenshotViewModel.recentPhotoImages.isEmpty {
+                    VStack {
+                        Image(systemName: "photo.on.rectangle")
+                            .font(.system(size: 60))
+                            .foregroundColor(.gray)
+                            .padding(.top, 40)
+                        
+                        Text("최근 스크린샷이 없습니다")
+                            .foregroundColor(.gray)
+                            .padding()
+                    }
                 } else {
-                    Text("최근 사진")
+                    Text("최근 스크린샷")
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
+                        .padding(.top, 20)
                     
-                    // 나중에 여기에 사진 그리드 구현
+                    // 나중에 여기에 스크린샷 그리드 구현
                 }
                 
                 Spacer()
-                
-                // 카메라 및 갤러리 버튼
-                HStack(spacing: 30) {
-                    // 카메라 버튼
-                    Button(action: {
-                        cameraViewModel.isShowingCamera = true
-                    }) {
-                        VStack {
-                            Image(systemName: "camera.fill")
-                                .font(.system(size: 30))
-                            Text("카메라")
-                                .font(.caption)
-                        }
-                    }
-                    
-                    // 갤러리 버튼
-                    Button(action: {
-                        cameraViewModel.isShowingPhotoLibrary = true
-                    }) {
-                        VStack {
-                            Image(systemName: "photo.on.rectangle")
-                                .font(.system(size: 30))
-                            Text("갤러리")
-                                .font(.caption)
-                        }
-                    }
-                }
-                .padding(.bottom, 20)
             }
             .navigationTitle("Taig")
-            .sheet(isPresented: $cameraViewModel.isShowingCamera) {
-                CameraView { image in
-                    cameraViewModel.processCapturedImage(image)
-                }
-            }
-            .sheet(isPresented: $cameraViewModel.isShowingPhotoLibrary) {
-                PhotoLibraryView { image in
-                    cameraViewModel.processSelectedImage(image)
-                }
-            }
-            .sheet(isPresented: $cameraViewModel.isShowingTagInput, onDismiss: {
+            .sheet(isPresented: $screenshotViewModel.isShowingTagInput, onDismiss: {
                 // 태그 입력 팝업이 닫힐 때 처리
                 print("태그 입력 팝업 닫힘")
             }) {
-                if let image = cameraViewModel.selectedImage {
+                if let image = screenshotViewModel.selectedImage {
                     TagInputPopupView(image: image) { tags in
-                        cameraViewModel.savePhotoWithTags(image: image, tags: tags)
+                        screenshotViewModel.savePhotoWithTags(image: image, tags: tags)
                     }
                 }
             }
             .onAppear {
-                cameraViewModel.checkPhotoLibraryPermission()
+                screenshotViewModel.checkPhotoLibraryPermission()
             }
         }
     }

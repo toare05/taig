@@ -3,14 +3,12 @@ import SwiftUI
 import Photos
 import CoreData
 
-/// 카메라 및 사진 관련 기능을 관리하는 ViewModel
-class CameraViewModel: ObservableObject {
+/// 스크린샷 관련 기능을 관리하는 ViewModel
+class ScreenshotViewModel: ObservableObject {
     // 서비스 인스턴스
     private let photoService = PhotoService.shared
     
     // 상태 변수
-    @Published var isShowingCamera = false
-    @Published var isShowingPhotoLibrary = false
     @Published var selectedImage: UIImage?
     @Published var isShowingTagInput = false
     @Published var recentPhotos: [PHAsset] = []
@@ -75,23 +73,34 @@ class CameraViewModel: ObservableObject {
         if photoService.authorizationStatus == .notDetermined {
             photoService.requestAuthorization { [weak self] granted in
                 if granted {
-                    self?.loadRecentPhotos()
+                    self?.loadRecentScreenshots()
                 }
             }
         } else if photoService.authorizationStatus == .authorized {
-            loadRecentPhotos()
+            loadRecentScreenshots()
         }
     }
     
-    /// 최근 사진 로드
-    func loadRecentPhotos() {
+    /// 최근 스크린샷 로드
+    func loadRecentScreenshots() {
         isLoading = true
-        photoService.fetchRecentPhotos { [weak self] assets in
-            guard let self = self else { return }
-            
-            self.recentPhotos = assets
-            self.loadThumbnails(for: assets)
+        
+        // 스크린샷만 가져오는 옵션 설정
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        fetchOptions.predicate = NSPredicate(format: "mediaSubtype = %d", PHAssetMediaSubtype.photoScreenshot.rawValue)
+        fetchOptions.fetchLimit = 30 // 최대 30개까지만 가져오기
+        
+        // 스크린샷 가져오기
+        let fetchResult = PHAsset.fetchAssets(with: .image, options: fetchOptions)
+        
+        var assets: [PHAsset] = []
+        fetchResult.enumerateObjects { asset, _, _ in
+            assets.append(asset)
         }
+        
+        self.recentPhotos = assets
+        self.loadThumbnails(for: assets)
     }
     
     /// 썸네일 이미지 로드
@@ -118,29 +127,7 @@ class CameraViewModel: ObservableObject {
         }
     }
     
-    /// 카메라로 찍은 사진 처리
-    /// - Parameter image: 카메라로 찍은 UIImage
-    func processCapturedImage(_ image: UIImage) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.selectedImage = image
-            self.isShowingTagInput = true
-            print("카메라로 찍은 사진 처리: 태그 입력 팝업 표시")
-        }
-    }
-    
-    /// 갤러리에서 선택한 사진 처리
-    /// - Parameter image: 갤러리에서 선택한 UIImage
-    func processSelectedImage(_ image: UIImage) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.selectedImage = image
-            self.isShowingTagInput = true
-            print("갤러리에서 선택한 사진 처리: 태그 입력 팝업 표시")
-        }
-    }
-    
-    /// 사진과 태그 저장
+    /// 스크린샷과 태그 저장
     /// - Parameters:
     ///   - image: 저장할 UIImage
     ///   - tags: 태그 문자열 배열
@@ -148,7 +135,7 @@ class CameraViewModel: ObservableObject {
         guard let image = selectedImage else { return }
         
         // 저장 시작 로그
-        print("사진 저장 시작: \(tags.count)개의 태그")
+        print("스크린샷 저장 시작: \(tags.count)개의 태그")
         
         // 이미지를 앱 내부 저장소에 저장
         photoService.saveImageToDocuments(image: image) { [weak self] fileURL in
@@ -168,7 +155,7 @@ class CameraViewModel: ObservableObject {
         }
     }
     
-    /// CoreData에 사진과 태그 저장
+    /// CoreData에 스크린샷과 태그 저장
     /// - Parameters:
     ///   - imageURL: 이미지 파일 경로
     ///   - thumbnailData: 썸네일 이미지 데이터
@@ -184,6 +171,7 @@ class CameraViewModel: ObservableObject {
             photoEntity.imageData = thumbnailData
             photoEntity.createdAt = Date()
             photoEntity.modifiedAt = Date()
+            photoEntity.isScreenshot = true // 스크린샷 여부 표시
             
             // 태그가 있는 경우에만 태그 생성 및 연결
             if !tagNames.isEmpty {
@@ -218,14 +206,14 @@ class CameraViewModel: ObservableObject {
             // 변경사항 저장
             do {
                 try self.viewContext.save()
-                print("사진 및 태그 저장 완료")
+                print("스크린샷 및 태그 저장 완료")
                 
                 // UI 업데이트는 메인 스레드에서
                 DispatchQueue.main.async {
                     self.selectedImage = nil
                     self.isShowingTagInput = false
-                    // 최근 사진 다시 로드
-                    self.loadRecentPhotos()
+                    // 최근 스크린샷 다시 로드
+                    self.loadRecentScreenshots()
                 }
             } catch {
                 print("저장 실패: \(error.localizedDescription)")
