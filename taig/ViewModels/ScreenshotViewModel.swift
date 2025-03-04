@@ -171,7 +171,7 @@ class ScreenshotViewModel: ObservableObject {
             photoEntity.imageData = thumbnailData
             photoEntity.createdAt = Date()
             photoEntity.modifiedAt = Date()
-            photoEntity.isScreenshot = true // 스크린샷 여부 표시
+            // 스크린샷 여부는 별도로 저장하지 않음 (모든 이미지가 스크린샷임)
             
             // 태그가 있는 경우에만 태그 생성 및 연결
             if !tagNames.isEmpty {
