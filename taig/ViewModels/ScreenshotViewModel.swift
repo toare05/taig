@@ -47,6 +47,8 @@ class ScreenshotViewModel: ObservableObject {
     
     /// 스크린샷 처리
     private func handleScreenshot() {
+        print("스크린샷 처리 시작")
+        
         // 가장 최근 스크린샷 가져오기
         let fetchOptions = PHFetchOptions()
         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
@@ -54,16 +56,41 @@ class ScreenshotViewModel: ObservableObject {
         fetchOptions.fetchLimit = 1
         
         let fetchResult = PHAsset.fetchAssets(with: .image, options: fetchOptions)
+        print("스크린샷 검색 결과: \(fetchResult.count)개 발견")
         
         if let asset = fetchResult.firstObject {
+            print("스크린샷 에셋 발견: \(asset)")
             photoService.getImage(from: asset, targetSize: PHImageManagerMaximumSize) { [weak self] image in
-                guard let self = self, let image = image else { return }
+                guard let self = self else { return }
                 
-                DispatchQueue.main.async {
-                    self.selectedImage = image
-                    self.isShowingTagInput = true
-                    print("스크린샷 처리: 태그 입력 팝업 표시")
+                if let image = image {
+                    print("스크린샷 이미지 로드 성공: \(image.size)")
+                    
+                    DispatchQueue.main.async {
+                        self.selectedImage = image
+                        self.isShowingTagInput = true
+                        print("스크린샷 처리: 태그 입력 팝업 표시 설정됨 (isShowingTagInput = \(self.isShowingTagInput))")
+                    }
+                } else {
+                    print("스크린샷 이미지 로드 실패")
+                    
+                    // 이미지 로드 실패 시 기본 이미지로 대체 (시뮬레이터 테스트용)
+                    DispatchQueue.main.async {
+                        self.selectedImage = UIImage(systemName: "photo")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
+                        self.isShowingTagInput = true
+                        print("기본 이미지로 대체: 태그 입력 팝업 표시 설정됨")
+                    }
                 }
+            }
+        } else {
+            print("스크린샷 에셋을 찾을 수 없음")
+            
+            // 시뮬레이터 테스트를 위해 에셋이 없어도 팝업 표시
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.selectedImage = UIImage(systemName: "photo")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
+                self.isShowingTagInput = true
+                print("에셋 없음: 기본 이미지로 태그 입력 팝업 표시 설정됨")
             }
         }
     }
