@@ -17,12 +17,57 @@ class CameraViewModel: ObservableObject {
     @Published var recentPhotoImages: [UIImage] = []
     @Published var isLoading = false
     
+    // 스크린샷 감지 관련
+    private var screenshotObserver: NSObjectProtocol?
+    
     // CoreData 관련
     private let viewContext: NSManagedObjectContext
     
     init(context: NSManagedObjectContext) {
         self.viewContext = context
         checkPhotoLibraryPermission()
+        setupScreenshotDetection()
+    }
+    
+    deinit {
+        if let observer = screenshotObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+    
+    /// 스크린샷 감지 설정
+    private func setupScreenshotDetection() {
+        screenshotObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.userDidTakeScreenshotNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            print("스크린샷이 감지되었습니다!")
+            self?.handleScreenshot()
+        }
+    }
+    
+    /// 스크린샷 처리
+    private func handleScreenshot() {
+        // 가장 최근 스크린샷 가져오기
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        fetchOptions.predicate = NSPredicate(format: "mediaSubtype = %d", PHAssetMediaSubtype.photoScreenshot.rawValue)
+        fetchOptions.fetchLimit = 1
+        
+        let fetchResult = PHAsset.fetchAssets(with: .image, options: fetchOptions)
+        
+        if let asset = fetchResult.firstObject {
+            photoService.getImage(from: asset, targetSize: PHImageManagerMaximumSize) { [weak self] image in
+                guard let self = self, let image = image else { return }
+                
+                DispatchQueue.main.async {
+                    self.selectedImage = image
+                    self.isShowingTagInput = true
+                    print("스크린샷 처리: 태그 입력 팝업 표시")
+                }
+            }
+        }
     }
     
     /// 사진 라이브러리 권한 확인 및 요청

@@ -15,6 +15,13 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             VStack {
+                // 스크린샷 감지 안내 텍스트
+                Text("스크린샷을 찍으면 자동으로 태그를 추가할 수 있습니다")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                
                 // 최근 사진 그리드 (나중에 구현)
                 if cameraViewModel.isLoading {
                     ProgressView("사진 로딩 중...")

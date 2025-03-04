@@ -3,6 +3,9 @@ import Photos
 import UIKit
 import SwiftUI
 
+// 최대 이미지 크기 상수
+let PHImageManagerMaximumSize = CGSize(width: 4000, height: 4000)
+
 /// 사진 관련 기능을 제공하는 서비스 클래스
 class PhotoService: ObservableObject {
     // 싱글톤 인스턴스
